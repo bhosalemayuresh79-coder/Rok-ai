@@ -13,12 +13,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Capacitor & Build
+      - name: Install Dependencies
         run: |
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "My App" "com.example.myapp" --web-dir .
-          npx cap add android
+
+      - name: Initialize Capacitor
+        run: 
+          npx cap init "My App" "com.example.myapp" --web-dir . || true
+          npx cap add android || true
           npx cap copy android
 
       - name: Set up JDK 17
@@ -26,6 +29,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: gradle
 
       - name: Build Android APK
         run: |
