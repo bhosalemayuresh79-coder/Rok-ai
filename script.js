@@ -1,10 +1,22 @@
 const URL = "https://vbkhqmllqdaupduakkhy.supabase.co";
 const KEY = "sb_publishable_5gZumduOCX0AmsyG1KQ8Kw_t7ScU4y2";
-const supabaseClient = supabase.createClient(URL, KEY);
+let supabaseClient;
+
+function initSupabase() {
+    if (typeof supabase !== 'undefined') {
+        supabaseClient = supabase.createClient(URL, KEY);
+        console.log("✅ Supabase initialized");
+        fetchTasks();
+        checkData();
+    } else {
+        setTimeout(initSupabase, 500);
+    }
+}
 
 async function checkData() {
+    if(!supabaseClient) return;
     const status = document.getElementById('status');
-    const { data, error } = await supabaseClient.from('tasks').select('*').limit(1);
+    const { error } = await supabaseClient.from('tasks').select('*').limit(1);
     if (error) {
         status.innerText = "Error: " + error.message;
         status.className = "alert alert-danger py-2 small";
@@ -18,7 +30,7 @@ async function addTask() {
     const input = document.getElementById('taskInput');
     const status = document.getElementById('status');
     const taskValue = input.value.trim();
-    if (!taskValue) return;
+    if (!taskValue || !supabaseClient) return;
     const { error } = await supabaseClient.from('tasks').insert([{ title: taskValue }]);
     if (error) {
         status.innerText = "Error: " + error.message;
@@ -32,6 +44,7 @@ async function addTask() {
 }
 
 async function fetchTasks() {
+    if(!supabaseClient) return;
     const taskList = document.getElementById('taskList');
     const { data, error } = await supabaseClient.from('tasks').select('*').order('created_at', { ascending: false });
     if (!error) {
@@ -45,5 +58,5 @@ async function fetchTasks() {
     }
 }
 
-fetchTasks();
-checkData();
+// सुरवात करा
+initSupabase();
